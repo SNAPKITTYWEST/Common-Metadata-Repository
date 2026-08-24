@@ -1,72 +1,69 @@
-# Common-Metadata-Repository — Architecture Summary
+# OpenMetadata — Architecture Summary
 
 ## Domain
-NASA Earth Science metadata catalog — ingests, stores, indexes, and serves metadata records for Earth observation datasets and associated services
+Open data context platform — unified metadata catalog, AI governance, data lineage, quality, and semantic search for humans and AI agents
 
 ## Architecture Type
-Clojure microservices monorepo — eight independently deployable JVM services sharing a set of libraries; services communicate via HTTP (transmit-lib) and AWS SQS/SNS; persistent state split between Oracle (metadata-db) and Elasticsearch (indexer/search); Redis for distributed caching
+Multi-module Maven monorepo: Java REST backend (Dropwizard/JAX-RS) + React SPA + Python ingestion framework + schema-first JSON Schema source of truth + MCP server for AI agents
 
 ## Primary Language
-Clojure
+TypeScript (UI) / Java (backend) / Python (ingestion)
 
 ## Major Components
-- search-app — public REST/AQL/STAC search API backed by Elasticsearch
-- ingest-app — provider-facing metadata ingestion; validates, stores, and triggers indexing
-- indexer-app — consumes ingest events, transforms concepts, writes to Elasticsearch
-- metadata-db-app — durable Oracle-backed concept store with CRUD and history
-- access-control-app — ACL groups and permissions, backed by Elasticsearch
-- bootstrap-app — bulk migration and reindex utility (core-async + SQS dispatch)
-- virtual-product-app — derives virtual granules from real products
-- mock-echo-app — stub ECHO/URS for local development and integration tests
-- subscription — Python Lambda worker (SQS polling + SNS fanout for data change notifications)
-- umm-spec-lib — Unified Metadata Model parsers, validators, and format converters
-- elastic-utils-lib — Elasticsearch query construction, index management, doc-values field mapping
-- message-queue-lib — AWS SQS/SNS abstraction with in-memory test double
-- transmit-lib — typed HTTP stubs for all inter-service calls
-- spatial-lib — geodetic and cartesian geometry, orbit intersection, shapefile handling
-- acl-lib — ACL fetcher and enforcement helpers
-- oracle-lib — Oracle JDBC connection pool and SQL utilities
-- redis-utils-lib — Redis cache and hash-cache with embedded test server
-- common-lib — cross-cutting: lifecycle, config, concepts, generics, caching, MIME types
-- common-app-lib — shared Ring middleware, humanizers, search service protocol
-- umm-lib — legacy UMM record definitions (pre-UMM-Spec)
-- schemas — JSON Schema files for all generic document types (grid, visualization, order-option, etc.)
-- dev-system — single-process dev harness that embeds all services plus Elasticsearch and Redis
+- openmetadata-spec (904 JSON Schemas + generated POJOs)
+- openmetadata-service (Dropwizard REST API, JDBI3 repositories, migration runner, ES/OS search, governance workflows)
+- openmetadata-ui (React/TypeScript SPA, 4725 TS/TSX files)
+- ingestion/ (Python framework, 130+ connectors, Source→Sink pipeline)
+- openmetadata-mcp (MCP server for AI agents)
+- openmetadata-k8s-operator (Kubernetes operator)
+- openmetadata-sdk (Java client SDK)
+- openmetadata-integration-tests (API ITs)
+- openmetadata-ui-core-components (React component library)
+- common/ (shared Java utilities)
+- openmetadata-shaded-deps (shaded ES+OS clients)
 
 ## Data Stores
-- Oracle (metadata-db-app primary persistence — collections, granules, services, tools, subscriptions, variables, tags, groups, ACLs, associations)
-- Elasticsearch (indexer-app writes; search-app reads; access-control-app has own index)
-- Redis (distributed caching for ACLs, humanizers, community usage metrics, granule counts, KMS keywords)
+- MySQL (default relational store)
+- PostgreSQL (alternative relational store)
+- Elasticsearch 7.17+ (search index)
+- OpenSearch 2.6+ (alternative search index)
 
 ## External Interfaces
-- AWS SQS — ingest events queue; subscription notification queue; dead-letter queues
-- AWS SNS — subscription notification fan-out to end users
-- ECHO / Launchpad — token authentication and system permission verification
-- NASA URS (Earthdata Login) — user identity lookup
-- NASA KMS (Keyword Management Service) — controlled science keyword vocabulary
-- EDSC (Earthdata Search Client) — primary consumer of the search API
-- Provider data systems — push metadata via ingest-app HTTP endpoints
+- REST API (JAX-RS, Dropwizard, port 8585)
+- MCP server (Model Context Protocol for AI agents: Claude Desktop, Cursor, VS Code, Windsurf)
+- Python ingestion CLI (metadata CLI, __main__.py)
+- Apache Airflow (ingestion orchestration)
+- WebSocket (real-time notifications)
+- OpenLineage events (lineage ingestion)
+- Webhooks (change event publishing)
 
 ## Evidence Files Read
 - README.md
-- project.clj
-- search-app/project.clj
-- ingest-app/project.clj
-- indexer-app/project.clj
-- search-app/src/cmr/search/routes.clj
-- search-app/src/cmr/search/api/routes.clj
-- search-app/src/cmr/search/services/query_service.clj
-- search-app/src/cmr/search/services/query_execution.clj
-- ingest-app/src/cmr/ingest/services/ingest_service.clj
-- ingest-app/src/cmr/ingest/services/ingest_service/collection.clj
-- ingest-app/src/cmr/ingest/api/routes.clj
-- indexer-app/src/cmr/indexer/services/index_service.clj
-- metadata-db-app/src/cmr/metadata_db/data/oracle/ (directory listing)
-- umm-spec-lib/src/cmr/umm_spec/umm_spec_core.clj
-- dev-system/src/cmr/dev_system/system.clj
-- subscription/src/subscription_worker.py
-- bootstrap-app/src/cmr/bootstrap/services/bootstrap_service.clj
-- common-lib/src/cmr/common/concepts.clj
-- common-lib/src/cmr/common/generics.clj
-- Generics.md
-- message-queue-lib/src/cmr/message_queue/queue/ (directory listing)
+- ARCHITECTURE.md
+- CLAUDE.md
+- pom.xml
+- .devcontainer/full-stack/docker-compose.yml
+- openmetadata-service/src/main/java/org/openmetadata/service/OpenMetadataApplication.java
+- ingestion/src/metadata/__main__.py
+- ingestion/src/metadata/ingestion/sink/metadata_rest.py
+- openmetadata-spec/src/main/resources/json/schema/entity/data/table.json
+- openmetadata-spec/src/main/resources/json/schema/entity/data/dataContract.json
+- openmetadata-spec/src/main/resources/json/schema/entity/ai/aiApplication.json
+- openmetadata-mcp/src/main/java/org/openmetadata/mcp/AuthEnrichedMcpContextExtractor.java
+- openmetadata-service/src/main/java/org/openmetadata/service/jdbi3/EntityRepository.java
+- openmetadata-service/src/main/java/org/openmetadata/service/resources/databases/TableResource.java
+- openmetadata-service/src/main/java/org/openmetadata/service/resources/search/SearchResource.java
+- openmetadata-service/src/main/java/org/openmetadata/service/resources/lineage/LineageResource.java
+- openmetadata-service/src/main/java/org/openmetadata/service/search/SearchRepository.java
+- openmetadata-service/src/main/java/org/openmetadata/service/events/ChangeEventHandler.java
+- openmetadata-service/src/main/java/org/openmetadata/service/governance/workflows/Workflow.java
+- openmetadata-service/src/main/java/org/openmetadata/service/apps/bundles/searchIndex/SearchIndexApp.java
+- openmetadata-service/src/main/java/org/openmetadata/service/jdbi3/CollectionDAO.java
+- openmetadata-service/src/main/java/org/openmetadata/service/security/DefaultAuthorizer.java
+- ingestion/src/metadata/ingestion/api/steps.py
+- ingestion/src/metadata/ingestion/source/database/common_db_source.py
+- ingestion/src/metadata/ingestion/source/database/snowflake/metadata.py
+- ingestion/src/metadata/ingestion/ometa/ometa_api.py
+- openmetadata-ui/src/main/resources/ui/src/App.tsx
+- openmetadata-ui/src/main/resources/ui/src/rest/tableAPI.ts
+- openmetadata-integration-tests/src/test/java/org/openmetadata/it/tests/TableResourceIT.java
