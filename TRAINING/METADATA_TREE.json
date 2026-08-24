@@ -1,0 +1,127 @@
+{
+  "node_id": "root",
+  "node_type": "repository",
+  "name": "Common-Metadata-Repository",
+  "children": [
+    {
+      "node_id": "svc-search",
+      "node_type": "service",
+      "name": "search-app",
+      "children": [
+        {
+          "node_id": "svc-search-api",
+          "node_type": "module",
+          "name": "api",
+          "children": [
+            {
+              "node_id": "svc-search-api-routes",
+              "node_type": "file",
+              "name": "routes.clj (compojure router: tags, services, tools, generics, humanizers, concepts-search, AQL, data-json, keywords, autocomplete, STAC)",
+              "children": []
+            },
+            {
+              "node_id": "svc-search-api-concepts-search",
+              "node_type": "file",
+              "name": "concepts_search.clj",
+              "children": []
+            },
+            {
+              "node_id": "svc-search-api-concepts-lookup",
+              "node_type": "file",
+              "name": "concepts_lookup.clj",
+              "children": []
+            },
+            {
+              "node_id": "svc-search-api-generics",
+              "node_type": "file",
+              "name": "generics.clj",
+              "children": []
+            },
+            {
+              "node_id": "svc-search-api-tags",
+              "node_type": "file",
+              "name": "tags.clj",
+              "children": []
+            },
+            {
+              "node_id": "svc-search-api-autocomplete",
+              "node_type": "file",
+              "name": "autocomplete.clj",
+              "children": []
+            }
+          ]
+        },
+        {
+          "node_id": "svc-search-services",
+          "node_type": "module",
+          "name": "services",
+          "children": [
+            {
+              "node_id": "svc-search-svc-query",
+              "node_type": "file",
+              "name": "query_service.clj (7-step pipeline: validate->model->acl->simplify->elastic->results)",
+              "children": []
+            },
+            {
+              "node_id": "svc-search-svc-qexec",
+              "node_type": "file",
+              "name": "query_execution.clj (direct-db vs elastic routing)",
+              "children": []
+            },
+            {
+              "node_id": "svc-search-svc-params",
+              "node_type": "module",
+              "name": "parameters (converters, validation)",
+              "children": []
+            },
+            {
+              "node_id": "svc-search-svc-facets",
+              "node_type": "module",
+              "name": "query_execution/facets",
+              "children": []
+            },
+            {
+              "node_id": "svc-search-svc-acl",
+              "node_type": "file",
+              "name": "acl_service.clj",
+              "children": []
+            },
+            {
+              "node_id": "svc-search-svc-tagging",
+              "node_type": "file",
+              "name": "tagging_service.clj",
+              "children": []
+            },
+            {
+              "node_id": "svc-search-svc-assoc",
+              "node_type": "file",
+              "name": "association_service.clj",
+              "children": []
+            }
+          ]
+        },
+        {
+          "node_id": "svc-search-data",
+          "node_type": "module",
+          "name": "data",
+          "children": [
+            {
+              "node_id": "svc-search-data-es",
+              "node_type": "file",
+              "name": "elastic_search_index.clj",
+              "children": []
+            },
+            {
+              "node_id": "svc-search-data-meta-cache",
+              "node_type": "module",
+              "name": "metadata_retrieval (metadata cache + transformer)",
+              "children": []
+            }
+          ]
+        },
+        {
+          "node_id": "svc-search-results",
+          "node_type": "module",
+          "name": "results_handlers (atom, JSON, UMM-JSON, STAC, KML, CSV, OpenData, timeline)",
+          "children": []
+        
