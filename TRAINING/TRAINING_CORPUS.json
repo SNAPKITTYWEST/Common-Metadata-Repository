@@ -1,24 +1,31 @@
 {
   "DISCOVERY": [
     {
-      "question": "What are the top-level service directories in the CMR repository and what does each do?",
-      "answer": "The CMR repository contains eight deployable services: (1) search-app — public REST/STAC/AQL search API backed by Elasticsearch; (2) ingest-app — provider-facing metadata ingest, validates UMM, stores via metadata-db, triggers indexing; (3) indexer-app — consumes ingest events from SQS, transforms concepts, writes to Elasticsearch; (4) metadata-db-app — Oracle-backed durable concept store with versioned history; (5) access-control-app — ACL groups and permission management stored in Elasticsearch; (6) bootstrap-app — bulk migration and reindex utility; (7) virtual-product-app — derives virtual granule records from source products; (8) mock-echo-app — stub ECHO/URS service for local dev and integration tests. A Python subscription worker in /subscription polls SQS and fans notifications out to SNS. All services share a set of libraries under directories ending in -lib.",
-      "evidence": "project.clj :modules :dirs lists all apps; README.md describes each; dev-system/src/cmr/dev_system/system.clj app-control-functions and app-startup-order enumerate them"
+      "question": "What are the top-level directories and their purpose in the OpenMetadata repository?",
+      "answer": "The repository has these major top-level trees: (1) openmetadata-spec/ — 904 JSON Schemas as the schema-first source of truth; all Java/Python/TypeScript models are generated from here. (2) openmetadata-service/ — the core Java backend: JAX-RS REST resources, JDBI3 repositories, search (ES/OS), migration runner, governance workflows, security/RBAC. (3) openmetadata-ui/src/main/resources/ui/ — the React/TypeScript SPA with 4,725 TS/TSX files. (4) ingestion/ — the Python ingestion framework with 130+ source connectors and a metadata_rest.py sink. (5) openmetadata-mcp/ — the MCP server exposing OpenMetadata to AI agents (Claude Desktop, Cursor, VS Code). (6) openmetadata-k8s-operator/ — the Kubernetes operator. (7) bootstrap/sql/migrations/ — append-only Flyway and native SQL schema migrations. (8) common/ — shared Java utilities. (9) openmetadata-shaded-deps/ — shaded Elasticsearch + OpenSearch Java clients. (10) openmetadata-integration-tests/ — backend API integration tests.",
+      "evidence": "ARCHITECTURE.md PART 2 'The 12 Maven modules + the ingestion tree'; CLAUDE.md 'Repository layout'; pom.xml <modules> list"
     },
     {
-      "question": "What libraries are shared across CMR services?",
-      "answer": "Shared libraries (all under nasa-cmr group): cmr-common-lib (lifecycle, config, concepts, generics, caching), cmr-common-app-lib (Ring middleware, humanizers, search protocol), cmr-umm-spec-lib (UMM parsers/converters/validators), cmr-umm-lib (legacy UMM), cmr-elastic-utils-lib (Elasticsearch query building and index management), cmr-message-queue-lib (SQS/SNS abstraction), cmr-transmit-lib (typed HTTP clients for inter-service calls), cmr-spatial-lib (geodetic/cartesian geometry, orbit intersection), cmr-acl-lib (ACL fetcher and enforcement), cmr-oracle-lib (Oracle JDBC pool), cmr-redis-utils-lib (Redis cache), cmr-schema-validation-lib (JSON Schema), cmr-orbits-lib (satellite orbit math), cmr-schemas (JSON Schema files for generic document types).",
-      "evidence": "project.clj :modules :dirs; individual app project.clj :dependencies lists"
+      "question": "What Maven modules exist in the reactor and what is their dependency order?",
+      "answer": "The 12 Maven modules in dependency order are: common (no deps) → openmetadata-spec (→ common) → openmetadata-shaded-deps (→ external only) → openmetadata-sdk (→ spec) → openmetadata-service (→ common, spec, shaded-deps) → openmetadata-k8s-operator (→ service provided) → openmetadata-mcp (→ service) → openmetadata-integration-tests (→ sdk, service, mcp, k8s — test scope) → openmetadata-ui-core-components → openmetadata-ui → openmetadata-dist (→ service, mcp, ui) → openmetadata-clients (isolated). There are zero inter-module cycles (I1 invariant).",
+      "evidence": "ARCHITECTURE.md PART 2 module table with 'Depends on →' column; pom.xml <modules> list; ARCHITECTURE.md I1"
     },
     {
-      "question": "What are the top-level non-service directories and what is their purpose?",
-      "answer": ".clj-kondo/ — static analysis config; .github/workflows/ — CI via cmr-checks.yml; bin/ — cmr CLI tool with bash autocomplete; dev-system/ — single-process dev harness embedding all services; other/ — miscellaneous scripts; resources/ — shell autocomplete and shared templates; schemas/ — JSON Schema files for generic document types; site-templates/ — shared HTML templates (gov.nasa.earthdata/cmr-site-templates artifact); system-int-test/ — cross-service integration tests; search-relevancy-test/ — relevancy scoring benchmarks.",
-      "evidence": "Root directory listing via gh api repos/.../contents/; README.md; project.clj :modules :dirs"
+      "question": "What entity schema types are defined in openmetadata-spec?",
+      "answer": "The spec defines entity schemas grouped by namespace: entity/data/ (table, dashboard, chart, pipeline, topic, mlmodel, glossary, glossaryTerm, dataContract, metric, container, searchIndex, storedProcedure, database, databaseSchema, apiCollection, apiEndpoint, ...); entity/ai/ (aiApplication, llmModel, mcpServer, agentExecution, promptTemplate, aiGovernanceFramework, aiGovernancePolicy, auditReport); entity/services/ (database, dashboard, pipeline, messaging, storage, mlmodel); entity/teams/ (user, team, role, policy); entity/domains/ (domain, dataProduct); entity/classification/ (classification, tag). There are 904 schemas total.",
+      "evidence": "ARCHITECTURE.md: '904 JSON Schemas'; gh api listing of openmetadata-spec/src/main/resources/json/schema/entity showing data/, ai/, services/, teams/ subdirs; table.json and aiApplication.json directly read"
     },
     {
-      "question": "What concept types does CMR manage?",
-      "answer": "CMR manages: collection (UMM-C), granule (UMM-G), service (UMM-S), tool (UMM-T), subscription (UMM-Sub), variable (UMM-Var), tag, tag-association, group, acl, service-association, tool-association, variable-association, generic-association. It also supports a set of extensible generic document types (grid, data-quality-summary, order-option, visualization, citation — and their -draft variants) governed by the approved-pipeline-documents configuration. Each concept type has a unique ID prefix (e.g., C for collection, G for granule, GRD for grid).",
-      "evidence": "common-lib/src/cmr/common/concepts.clj (generic-concept-types->concept-prefix map, draft detection); umm-spec-lib/src/cmr/umm_spec/umm_spec_core.clj (concept-type dispatch on UMM record types); metadata-db-app/src/cmr/metadata_db/data/oracle/concepts/ directory (per-type Oracle implementations); schemas/resources/schemas/ directory listing"
-    },
+      "question": "Where is the Python ingestion CLI entry point and how is a connector loaded?",
+      "answer": "The CLI entry point is ingestion/src/metadata/__main__.py which calls metadata.cmd.metadata(). At runtime, a connector is loaded via its service_spec.py (ServiceSpec, resolved by DefaultSourceLoader). Each connector under ingestion/src/metadata/ingestion/source/{type}/{name}/ ships __init__.py, service_spec.py, metadata.py (the <Name>Source class), and connection.py. The source must extend a topology base (CommonDbSourceService for SQL, CommonNoSQLSource, etc.) and implement create() raising InvalidSourceException. ~97 connectors have service_spec.py; 94/95 metadata.py files carry create() + InvalidSourceException (98.9%).",
+      "evidence": "ingestion/src/metadata/__main__.py; ARCHITECTURE.md Path B and I2 invariant; ingestion/src/metadata/ingestion/api/steps.py Source class definition; ARCHITECTURE.md connector inventory"
+    }
+  ],
+  "ARCHITECTURE": [
     {
-      "question": "How is the CMR b
+      "question": "What is the schema-first invariant and why does it matter?",
+      "answer": "Invariant I4: every entity field that exists in the REST API must originate in a JSON Schema file under openmetadata-spec/src/main/resources/json/schema/. The Java POJOs (via jsonschema2pojo), Python Pydantic models (via datamodel-code-generator, gitignored), and TypeScript types (via quicktype, committed) are all generated artifacts. Adding a field by hand in Java/Python/TypeScript without updating the schema will cause drift, break ingestion, and fail integration tests.",
+      "evidence": "ARCHITECTURE.md I4 invariant; CLAUDE.md 'Schema-first'; directory listing showing target/generated-sources in spec module"
+    }
+  ]
+}
