@@ -1,127 +1,126 @@
 {
   "node_id": "root",
   "node_type": "repository",
-  "name": "Common-Metadata-Repository",
+  "name": "OpenMetadata",
   "children": [
     {
-      "node_id": "svc-search",
-      "node_type": "service",
-      "name": "search-app",
+      "node_id": "spec",
+      "node_type": "maven_module",
+      "name": "openmetadata-spec",
       "children": [
         {
-          "node_id": "svc-search-api",
-          "node_type": "module",
-          "name": "api",
+          "node_id": "spec.schemas",
+          "node_type": "directory",
+          "name": "json/schema (904 schemas)",
           "children": [
             {
-              "node_id": "svc-search-api-routes",
-              "node_type": "file",
-              "name": "routes.clj (compojure router: tags, services, tools, generics, humanizers, concepts-search, AQL, data-json, keywords, autocomplete, STAC)",
+              "node_id": "spec.schemas.entity",
+              "node_type": "schema_group",
+              "name": "entity/",
+              "children": [
+                {
+                  "node_id": "spec.schemas.entity.data",
+                  "node_type": "schema_group",
+                  "name": "entity/data/ (table, dashboard, pipeline, topic, mlmodel, glossary, dataContract, metric, ...)",
+                  "children": []
+                },
+                {
+                  "node_id": "spec.schemas.entity.ai",
+                  "node_type": "schema_group",
+                  "name": "entity/ai/ (aiApplication, llmModel, mcpServer, agentExecution, promptTemplate, ...)",
+                  "children": []
+                },
+                {
+                  "node_id": "spec.schemas.entity.services",
+                  "node_type": "schema_group",
+                  "name": "entity/services/ (database, dashboard, pipeline, messaging, storage, mlmodel, ...)",
+                  "children": []
+                },
+                {
+                  "node_id": "spec.schemas.entity.teams",
+                  "node_type": "schema_group",
+                  "name": "entity/teams/ (user, team, role, policy)",
+                  "children": []
+                },
+                {
+                  "node_id": "spec.schemas.entity.classification",
+                  "node_type": "schema_group",
+                  "name": "entity/classification/ (classification, tag)",
+                  "children": []
+                },
+                {
+                  "node_id": "spec.schemas.entity.domains",
+                  "node_type": "schema_group",
+                  "name": "entity/domains/ (domain, dataProduct)",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "node_id": "spec.schemas.type",
+              "node_type": "schema_group",
+              "name": "type/ (entityReference, tagLabel, lineage, paging, ...)",
               "children": []
             },
             {
-              "node_id": "svc-search-api-concepts-search",
-              "node_type": "file",
-              "name": "concepts_search.clj",
-              "children": []
-            },
-            {
-              "node_id": "svc-search-api-concepts-lookup",
-              "node_type": "file",
-              "name": "concepts_lookup.clj",
-              "children": []
-            },
-            {
-              "node_id": "svc-search-api-generics",
-              "node_type": "file",
-              "name": "generics.clj",
-              "children": []
-            },
-            {
-              "node_id": "svc-search-api-tags",
-              "node_type": "file",
-              "name": "tags.clj",
-              "children": []
-            },
-            {
-              "node_id": "svc-search-api-autocomplete",
-              "node_type": "file",
-              "name": "autocomplete.clj",
+              "node_id": "spec.schemas.api",
+              "node_type": "schema_group",
+              "name": "api/ (CreateTable, AddLineage, CreateGlossary, ...)",
               "children": []
             }
           ]
         },
         {
-          "node_id": "svc-search-services",
-          "node_type": "module",
-          "name": "services",
-          "children": [
-            {
-              "node_id": "svc-search-svc-query",
-              "node_type": "file",
-              "name": "query_service.clj (7-step pipeline: validate->model->acl->simplify->elastic->results)",
-              "children": []
-            },
-            {
-              "node_id": "svc-search-svc-qexec",
-              "node_type": "file",
-              "name": "query_execution.clj (direct-db vs elastic routing)",
-              "children": []
-            },
-            {
-              "node_id": "svc-search-svc-params",
-              "node_type": "module",
-              "name": "parameters (converters, validation)",
-              "children": []
-            },
-            {
-              "node_id": "svc-search-svc-facets",
-              "node_type": "module",
-              "name": "query_execution/facets",
-              "children": []
-            },
-            {
-              "node_id": "svc-search-svc-acl",
-              "node_type": "file",
-              "name": "acl_service.clj",
-              "children": []
-            },
-            {
-              "node_id": "svc-search-svc-tagging",
-              "node_type": "file",
-              "name": "tagging_service.clj",
-              "children": []
-            },
-            {
-              "node_id": "svc-search-svc-assoc",
-              "node_type": "file",
-              "name": "association_service.clj",
-              "children": []
-            }
-          ]
-        },
-        {
-          "node_id": "svc-search-data",
-          "node_type": "module",
-          "name": "data",
-          "children": [
-            {
-              "node_id": "svc-search-data-es",
-              "node_type": "file",
-              "name": "elastic_search_index.clj",
-              "children": []
-            },
-            {
-              "node_id": "svc-search-data-meta-cache",
-              "node_type": "module",
-              "name": "metadata_retrieval (metadata cache + transformer)",
-              "children": []
-            }
-          ]
-        },
-        {
-          "node_id": "svc-search-results",
-          "node_type": "module",
-          "name": "results_handlers (atom, JSON, UMM-JSON, STAC, KML, CSV, OpenData, timeline)",
+          "node_id": "spec.generated_pojos",
+          "node_type": "directory",
+          "name": "target/generated-sources (Java POJOs via jsonschema2pojo)",
           "children": []
-        
+        }
+      ]
+    },
+    {
+      "node_id": "common",
+      "node_type": "maven_module",
+      "name": "common",
+      "children": [
+        {
+          "node_id": "common.utils",
+          "node_type": "package",
+          "name": "common/utils/ (CommonUtil, nullOrEmpty, ...)",
+          "children": []
+        }
+      ]
+    },
+    {
+      "node_id": "shaded_deps",
+      "node_type": "maven_module",
+      "name": "openmetadata-shaded-deps",
+      "children": [
+        {
+          "node_id": "shaded_deps.es",
+          "node_type": "submodule",
+          "name": "elasticsearch-dep (ES client relocated to es.*)",
+          "children": []
+        },
+        {
+          "node_id": "shaded_deps.os",
+          "node_type": "submodule",
+          "name": "opensearch-dep (OS client relocated to os.*)",
+          "children": []
+        }
+      ]
+    },
+    {
+      "node_id": "service",
+      "node_type": "maven_module",
+      "name": "openmetadata-service",
+      "children": [
+        {
+          "node_id": "service.app",
+          "node_type": "class",
+          "name": "OpenMetadataApplication.java (Dropwizard entry point)"
+        }
+      ]
+    }
+  ]
+}
