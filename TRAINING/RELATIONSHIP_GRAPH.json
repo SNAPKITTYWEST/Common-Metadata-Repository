@@ -1,104 +1,128 @@
 [
   {
-    "from": "svc-ingest",
-    "to": "svc-mdb",
+    "from": "service",
+    "to": "spec",
+    "relationship": "depends_on",
+    "evidence": "ARCHITECTURE.md: 'The backend is a mid-graph hub... depends only on common, openmetadata-spec, and the shaded search clients'; pom.xml module list",
+    "confidence": "OBSERVED"
+  },
+  {
+    "from": "service",
+    "to": "common",
+    "relationship": "depends_on",
+    "evidence": "ARCHITECTURE.md module table: openmetadata-service → common, spec, es-deps, os-deps",
+    "confidence": "OBSERVED"
+  },
+  {
+    "from": "service",
+    "to": "shaded_deps",
+    "relationship": "depends_on",
+    "evidence": "ARCHITECTURE.md: 'ES + OS Java clients relocated behind es.*/os.* so both link at once'; shaded_deps ← service",
+    "confidence": "OBSERVED"
+  },
+  {
+    "from": "sdk",
+    "to": "spec",
+    "relationship": "depends_on",
+    "evidence": "ARCHITECTURE.md module table: openmetadata-sdk → spec",
+    "confidence": "OBSERVED"
+  },
+  {
+    "from": "mcp",
+    "to": "service",
+    "relationship": "depends_on",
+    "evidence": "ARCHITECTURE.md: openmetadata-mcp → service",
+    "confidence": "OBSERVED"
+  },
+  {
+    "from": "k8s_operator",
+    "to": "service",
+    "relationship": "depends_on",
+    "evidence": "ARCHITECTURE.md: openmetadata-k8s-operator → service (provided)",
+    "confidence": "OBSERVED"
+  },
+  {
+    "from": "integration_tests",
+    "to": "sdk",
+    "relationship": "depends_on",
+    "evidence": "ARCHITECTURE.md: integration-tests → sdk, service, mcp, k8s (test)",
+    "confidence": "OBSERVED"
+  },
+  {
+    "from": "integration_tests",
+    "to": "service",
+    "relationship": "depends_on",
+    "evidence": "ARCHITECTURE.md: integration-tests → service (test)",
+    "confidence": "OBSERVED"
+  },
+  {
+    "from": "dist",
+    "to": "service",
+    "relationship": "depends_on",
+    "evidence": "ARCHITECTURE.md: openmetadata-dist → service, mcp, ui",
+    "confidence": "OBSERVED"
+  },
+  {
+    "from": "dist",
+    "to": "mcp",
+    "relationship": "depends_on",
+    "evidence": "ARCHITECTURE.md: openmetadata-dist → service, mcp, ui",
+    "confidence": "OBSERVED"
+  },
+  {
+    "from": "dist",
+    "to": "ui",
+    "relationship": "depends_on",
+    "evidence": "ARCHITECTURE.md: openmetadata-dist → service, mcp, ui",
+    "confidence": "OBSERVED"
+  },
+  {
+    "from": "ui",
+    "to": "ui_core_components",
+    "relationship": "depends_on",
+    "evidence": "CLAUDE.md: 'ui → ui-core-components is a yarn/npm edge'; ARCHITECTURE.md: ui depends on ui-core-components (npm)",
+    "confidence": "OBSERVED"
+  },
+  {
+    "from": "spec.schemas",
+    "to": "spec.generated_pojos",
+    "relationship": "generates",
+    "evidence": "ARCHITECTURE.md I4: 'jsonschema2pojo → Java POJOs (openmetadata-spec/target/...)'; schema-first invariant",
+    "confidence": "OBSERVED"
+  },
+  {
+    "from": "spec.schemas",
+    "to": "ingestion.generated",
+    "relationship": "generates",
+    "evidence": "ARCHITECTURE.md I4: 'datamodel-code-generator → Python Pydantic (ingestion/src/metadata/generated/, gitignored)'",
+    "confidence": "OBSERVED"
+  },
+  {
+    "from": "spec.schemas",
+    "to": "ui.generated",
+    "relationship": "generates",
+    "evidence": "ARCHITECTURE.md I4: 'quicktype → TypeScript (openmetadata-ui/.../src/generated/, committed)'",
+    "confidence": "OBSERVED"
+  },
+  {
+    "from": "ingestion.sources",
+    "to": "ingestion.sink",
+    "relationship": "produces",
+    "evidence": "ARCHITECTURE.md Path B: 'the topology yields entities; the sink (metadata_rest.py) POSTs them to the backend REST API'",
+    "confidence": "OBSERVED"
+  },
+  {
+    "from": "ingestion.sink",
+    "to": "service.resources",
     "relationship": "calls",
-    "evidence": "ingest-app/project.clj depends on nasa-cmr/cmr-metadata-db-app; transmit-lib/metadata_db.clj used in ingest_service/collection.clj via (mdb/save-concept)",
+    "evidence": "ingestion/src/metadata/ingestion/sink/metadata_rest.py: posts to backend REST API (Path B); imports CreateTableRequest, CreatePipelineRequest, etc.",
     "confidence": "OBSERVED"
   },
   {
-    "from": "svc-ingest",
-    "to": "svc-indexer",
+    "from": "service.resources",
+    "to": "service.jdbi3",
     "relationship": "calls",
-    "evidence": "ingest-app/project.clj depends on transmit-lib; transmit-lib/indexer.clj; ingest_service triggers indexing after saving to metadata-db",
+    "evidence": "ARCHITECTURE.md Path A: 'A JAX-RS resource in service.resources delegates to an EntityRepository in service.jdbi3'",
     "confidence": "OBSERVED"
-  },
-  {
-    "from": "svc-ingest",
-    "to": "lib-umm-spec",
-    "relationship": "depends_on",
-    "evidence": "ingest-app/project.clj: [nasa-cmr/cmr-umm-spec-lib]; ingest_service/collection.clj: (spec/parse-metadata ...) and (spec/validate-metadata ...)",
-    "confidence": "OBSERVED"
-  },
-  {
-    "from": "svc-ingest",
-    "to": "lib-message-queue",
-    "relationship": "depends_on",
-    "evidence": "ingest-app/project.clj: [nasa-cmr/cmr-message-queue-lib]; event publication on ingest/delete",
-    "confidence": "OBSERVED"
-  },
-  {
-    "from": "svc-ingest",
-    "to": "lib-acl",
-    "relationship": "depends_on",
-    "evidence": "ingest-app/project.clj: [nasa-cmr/cmr-acl-lib]; ingest/api/routes.clj: (acl/verify-ingest-management-permission ctx :update)",
-    "confidence": "OBSERVED"
-  },
-  {
-    "from": "svc-indexer",
-    "to": "lib-elastic-utils",
-    "relationship": "depends_on",
-    "evidence": "indexer-app/project.clj: [nasa-cmr/cmr-elastic-utils-lib]; index_service.clj imports cmr.elastic-utils.es-helper and cmr.elastic-utils.connect",
-    "confidence": "OBSERVED"
-  },
-  {
-    "from": "svc-indexer",
-    "to": "svc-mdb",
-    "relationship": "calls",
-    "evidence": "index_service.clj imports cmr.transmit.metadata-db and cmr.transmit.metadata-db2 to fetch full concept metadata during indexing",
-    "confidence": "OBSERVED"
-  },
-  {
-    "from": "svc-indexer",
-    "to": "lib-message-queue",
-    "relationship": "consumes",
-    "evidence": "indexer-app/project.clj: [nasa-cmr/cmr-message-queue-lib]; event_handler.clj consumes SQS events; index_service.clj imports cmr.message-queue.queue.queue-protocol",
-    "confidence": "OBSERVED"
-  },
-  {
-    "from": "svc-indexer",
-    "to": "lib-umm-spec",
-    "relationship": "depends_on",
-    "evidence": "indexer-app/project.clj: [nasa-cmr/cmr-umm-spec-lib]; concept_parser.clj uses umm-spec to parse metadata for indexing",
-    "confidence": "OBSERVED"
-  },
-  {
-    "from": "svc-search",
-    "to": "lib-elastic-utils",
-    "relationship": "depends_on",
-    "evidence": "search-app/project.clj: [nasa-cmr/cmr-elastic-utils-lib]; query_service.clj imports cmr.elastic-utils.search.es-wrapper and es-index",
-    "confidence": "OBSERVED"
-  },
-  {
-    "from": "svc-search",
-    "to": "svc-mdb",
-    "relationship": "calls",
-    "evidence": "search-app/project.clj depends on cmr-metadata-db-app; query_execution.clj has direct-db-query? path for specific granule lookups bypassing Elasticsearch",
-    "confidence": "OBSERVED"
-  },
-  {
-    "from": "svc-search",
-    "to": "lib-umm-spec",
-    "relationship": "depends_on",
-    "evidence": "search-app/project.clj: [nasa-cmr/cmr-umm-spec-lib]; metadata-retrieval/metadata-transformer uses umm-spec to convert metadata to requested output format",
-    "confidence": "OBSERVED"
-  },
-  {
-    "from": "svc-search",
-    "to": "lib-spatial",
-    "relationship": "depends_on",
-    "evidence": "search-app/project.clj: [nasa-cmr/cmr-spatial-lib]; query_service.clj imports cmr.spatial.codec and cmr.spatial.tile for spatial parameter handling",
-    "confidence": "OBSERVED"
-  },
-  {
-    "from": "svc-search",
-    "to": "lib-acl",
-    "relationship": "depends_on",
-    "evidence": "search-app/project.clj: [nasa-cmr/cmr-acl-lib]; query_service.clj step 3 is 'Apply ACLs to query' via acl_service.clj",
-    "confidence": "OBSERVED"
-  },
-  {
-    "from": "svc-mdb",
-    "to": "lib-oracle",
-    "relationship": "depends_on",
-    "evidence": "metadata-d
+  }
+]
